@@ -7,7 +7,6 @@ require("net").Server:listen(tonumber(os.getenv("PORT") or 1234), function()
 end)
 
 local fs = require("fs")
-local timer = require("timer")
 local logger = discordia.Logger(4, "%Y-%m-%d %X")
 local date = discordia.Date()
 
@@ -93,11 +92,6 @@ client:on('ready', function()
 	}
 	client._messageHead = "**Beep Boop !!**\n"
 
-	timer.setInterval(600000, function()
-		coroutine.wrap(function()
-			local a, c = require('coro-http').request("GET", "http://api.aladhan.com/v1/calendarByCity?city=Taif&country=saudi%sarabia&method=4&month=1&year=2020")
-		end)()
-	end)
 end)
 
 client:on('messageCreate', function(message)
