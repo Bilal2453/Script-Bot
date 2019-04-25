@@ -2,16 +2,17 @@ local discordia = require('discordia')
 -- print('\027' .. '[2J')
 discordia.extensions()
 
-require("net").Server:listen(tonumber(os.getenv("PORT") or 1234), function()
+require("net").Server:listen(tonumber(os.getenv("PORT") or 1234), function(a, b)
 	p("Listening on port: ", os.getenv("PORT") or 1234)
+	print(a, b)
 end)
 
 local fs = require("fs")
+local timer = require("timer")
 local logger = discordia.Logger(4, "%Y-%m-%d %X")
 local date = discordia.Date()
 
 local tokenID = os.getenv("token") or io.open("token.txt", "r"):read()
-p("Bot ".. tokenID)
 
 local client = discordia.Client {
 	cacheAllMembers = true,
@@ -91,7 +92,24 @@ client:on('ready', function()
 		"زق", "حمار", "زب", "طيز", "طز"
 	}
 	client._messageHead = "**Beep Boop !!**\n"
+	client._runningTime = os.time()
 
+	local Guild = client.guilds:find(function(guild)
+		if guild.id == "544595942079463434" then
+			return true
+		end
+	end)
+	local textChannel = Guild.textChannels:find(function(tChannel)
+		if tChannel.id == "570912013291749376" then
+			return true
+		end
+	end)
+
+	timer.setInterval(600000, function()
+		coroutine.wrap(function()
+			textChannel:send("At **".. os.date("%d/%M/%Y %T").. "**, Running: **".. ((os.time()-client._runningTime)/60).. "**min")
+		end)()
+	end)
 end)
 
 client:on('messageCreate', function(message)
