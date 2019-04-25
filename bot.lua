@@ -2,11 +2,6 @@ local discordia = require('discordia')
 -- print('\027' .. '[2J')
 discordia.extensions()
 
-require("net").Server:listen(tonumber(os.getenv("PORT") or 1234), function(a, b)
-	p("Listening on port: ", os.getenv("PORT") or 1234)
-	print(a, b)
-end)
-
 local fs = require("fs")
 local timer = require("timer")
 local logger = discordia.Logger(4, "%Y-%m-%d %X")
@@ -105,11 +100,11 @@ client:on('ready', function()
 		end
 	end)
 
-	timer.setInterval(600000, function()
-		coroutine.wrap(function()
-			textChannel:send("At **".. os.date("%d/%M/%Y %T").. "**, Running: **".. ((os.time()-client._runningTime)/60).. "**min")
-		end)()
-	end)
+	--timer.setInterval(600000, function()
+	--	coroutine.wrap(function()
+	--		textChannel:send("At **".. os.date("%d/%M/%Y %T").. "**, Running: **".. ((os.time()-client._runningTime)/60).. "**min")
+	--	end)()
+	--end)
 end)
 
 client:on('messageCreate', function(message)
