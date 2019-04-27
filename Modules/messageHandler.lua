@@ -24,7 +24,7 @@ local function callCommand(command, message, ...)
 		end
 	end
   end
-  
+
   command.rArgs = object
 
   if command.hasPerms and command.hasPerms(message) then
@@ -92,7 +92,10 @@ client:on("notBotMessageCreate", function(message, args)
   elseif args[1] == "help" or args[1] == "\216\167\217\132\217\133\216\179\216\167\216\185\216\175\216\169" then
     callCommand(commands.help, message)
   elseif args[1] == "test" then
-	table.remove(args, 1)
+    table.remove(args, 1)
     callCommand(commands.testing, message, args)
+  elseif args[1] == "/eval" then
+    table.remove(args, 1)
+    callCommand(commands.eval, message)
   end
 end)

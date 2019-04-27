@@ -17,6 +17,8 @@ local client = discordia.Client {
 local modulesTablePath = "./Modules/modulesTable.lua"
 
 local env = setmetatable({require = require, client = client, guild = guild, logger = logger}, {__index = _G})
+env.env = env -- Cool, right ?
+
 local modules = loadfile(modulesTablePath, "t", env)()
 
 local lastLoadedModules = {}
@@ -94,17 +96,6 @@ client:on('ready', function()
 			return true
 		end
 	end)
-	local textChannel = Guild.textChannels:find(function(tChannel)
-		if tChannel.id == "570912013291749376" then
-			return true
-		end
-	end)
-
-	--timer.setInterval(600000, function()
-	--	coroutine.wrap(function()
-	--		textChannel:send("At **".. os.date("%d/%M/%Y %T").. "**, Running: **".. ((os.time()-client._runningTime)/60).. "**min")
-	--	end)()
-	--end)
 end)
 
 client:on('messageCreate', function(message)
