@@ -2,7 +2,7 @@ local discordia = require('discordia')
 discordia.extensions()
 
 local function callCommand(command, message, ...)
-  if type(command) ~= "function" and type(command) ~= "table" then return false end
+  if type(command) ~= "function" and type(command) ~= "table" then return end
   if not commands then return false end
 
   local args = {...}
@@ -11,18 +11,18 @@ local function callCommand(command, message, ...)
 
   if command.arguments then
     for argName, argTable in pairs(command.arguments) do
-		for i, v in pairs(type(args[1]) == "table" and args[1] or args) do
-			if i == argTable.numa or i == argTable.numb then
-				if argTable.type == "number" then
-					object[argName] = tonumber(v)
-				elseif argTable.type == "string" then
-					object[argName] = tostring(v)
-				elseif argTable.type == "member" then
-					object[argName] = client._findMember(message, v)
-				end
-			end
-		end
-	end
+      for i, v in pairs(type(args[1]) == "table" and args[1] or args) do
+        if i == argTable.numa or i == argTable.numb then
+          if argTable.type == "number" then
+            object[argName] = tonumber(v)
+          elseif argTable.type == "string" then
+            object[argName] = tostring(v)
+          elseif argTable.type == "member" then
+            object[argName] = client._findMember(message, v)
+          end
+        end
+      end
+    end
   end
 
   command.rArgs = object
@@ -30,7 +30,7 @@ local function callCommand(command, message, ...)
   if command.hasPerms and command.hasPerms(message) then
     s, e = pcall(command, message, args)
   else
-    message:reply(client._messageHead.. "You don't have Permission to do that!!")
+    message:reply(client._messageHead.. "You don't have Permissions to do that!!")
     s = true -- It's not an error
   end
 
@@ -40,6 +40,7 @@ local function callCommand(command, message, ...)
 end
 
 -- Welcome Handling
+--[[
 client:on("notBotMessageCreate", function(message, args)
   if message.author.bot then return false end
 
@@ -59,13 +60,15 @@ client:on("notBotMessageCreate", function(message, args)
     end
   end
 end)
-
+]]
+--[[
 -- Owner Commands Handling
--- client:on("ownerMessageCreate", function(message, args)
---   if args[1] == "shutdown" then
---     commands.shutdown(message)
---   end
--- end)
+client:on("ownerMessageCreate", function(message, args)
+  if args[1] == "shutdown" then
+    commands.shutdown(message)
+  end
+end)
+]]
 
 -- Commands Handling
 client:on("notBotMessageCreate", function(message, args)

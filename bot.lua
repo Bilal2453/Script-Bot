@@ -5,7 +5,6 @@ discordia.extensions()
 local fs = require("fs")
 local timer = require("timer")
 local logger = discordia.Logger(4, "%Y-%m-%d %X")
-local date = discordia.Date()
 
 local tokenID = os.getenv("token") or io.open("token.txt", "r"):read()
 
@@ -16,7 +15,7 @@ local client = discordia.Client {
 
 local modulesTablePath = "./Modules/modulesTable.lua"
 
-local env = setmetatable({require = require, client = client, guild = guild, logger = logger}, {__index = _G})
+local env = setmetatable({timer = timer, require = require, client = client, guild = guild, logger = logger}, {__index = _G})
 env.env = env -- Cool, right ?
 
 local modules = loadfile(modulesTablePath, "t", env)()
@@ -25,7 +24,7 @@ local lastLoadedModules = {}
 
 local function loadModules()
 	for module, path in pairs(modules) do
-		if fs.existsSync(path)
+		if fs.existsSync(path) 
 		and lastLoadedModules[module] ~= fs.readFileSync(path) then
 
 			local moduleName = tostring(module:sub(1, 1):upper().. module:sub(2) or nil)
@@ -42,7 +41,7 @@ local function loadModules()
 			elseif module == "messageEventHandler" then
 				client:removeAllListeners("eMessageCreate") -- reloads "messageEventHandler"
 			end
-			_G[module] = nil -- Unload the module before reloading them
+			_G[module] = nil -- Unload the modules before reloading them
 
 			-- re/loading the Modules
 			su1, loaderFunction = pcall(loadfile, path, "t", env)
@@ -79,7 +78,7 @@ client:on('ready', function()
 	})
 	loadModules() -- Loads the Modules
 	-- Defining some values to the client
-	client._findMember = commands.findMember
+	client._findMember = commands and commands.findMember or function() return end
 	client._badWords = {
 		"fuck", "shit", "bitch", "motherfucker", "فك",
 		"موثير", "كس", "كسمك", "كسامك", "قحط",
@@ -90,25 +89,17 @@ client:on('ready', function()
 	}
 	client._messageHead = "**Beep Boop !!**\n"
 	client._runningTime = os.time()
-
-	local Guild = client.guilds:find(function(guild)
-		if guild.id == "544595942079463434" then
-			return true
-		end
-	end)
+	client._perfix = ""
 end)
 
 client:on('messageCreate', function(message)
 	pcall(loadModules) -- Reloads modules if needs to.
+
 	client:emit("eMessageCreate", message)
 	if not tostring(message) then return end
 
-	local args = message.content:split(" ")
-	-- Just for some debugging
-	if args[1] == "reloadModules" and message.author.id == message.guild.ownerId then
-		if args[2] then
-			pcall(loadModules)
-		end
+	if not client._findMember then
+		client._findMember = commands and commands.findMember or function() end
 	end
 end)
 
