@@ -24,7 +24,7 @@ local lastLoadedModules = {}
 
 local function loadModules()
 	for module, path in pairs(modules) do
-		if fs.existsSync(path) 
+		if fs.existsSync(path)
 		and lastLoadedModules[module] ~= fs.readFileSync(path) then
 
 			local moduleName = tostring(module:sub(1, 1):upper().. module:sub(2) or nil)
@@ -95,12 +95,14 @@ end)
 client:on('messageCreate', function(message)
 	pcall(loadModules) -- Reloads modules if needs to.
 
-	client:emit("eMessageCreate", message)
 	if not tostring(message) then return end
 
 	if not client._findMember then
 		client._findMember = commands and commands.findMember or function() end
 	end
+	
+	client:emit("loadCommands")
+	client:emit("eMessageCreate", message)
 end)
 
 client:run('Bot '.. tokenID)

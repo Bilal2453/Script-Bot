@@ -4,7 +4,6 @@ local stopWatch = discordia.Stopwatch
 
 discordia.extensions()
 
-
 function findMember(message, name)
 	if type(name) ~= "string" or name == "" then return false end
 	local searched = {}
@@ -130,7 +129,7 @@ end
 loadCommands()
 
 -- Try to reload commands on every message sent.
-client:emit("messageCreate", function()
+client:on("loadCommands", function()
 	loadCommands()
 end)
 return commands
