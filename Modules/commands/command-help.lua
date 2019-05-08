@@ -28,7 +28,11 @@ local function help(self)
 	}
 end
 
-local help = createCommand(help, "sendMessages")
+help = createCommand(help, "sendMessages")
+help.commandNames = {
+	"help",
+	"\216\167\217\132\217\133\216\179\216\167\216\185\216\175\216\169"
+}
 
 help.name = "help"
 return help

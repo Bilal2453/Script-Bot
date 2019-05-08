@@ -96,6 +96,13 @@ clear.arguments = {
 	ln = {type = "number", numa = 1, numb = 2},
 	member = {type = "member", numa = 2, numb = 1}
 }
+clear.commandNames = {
+	"clear",
+	"clr",
+	"del",
+	"delete",
+	"\216\167\217\133\216\179\216\173"
+}
 clear.name = "clear"
 
 return clear

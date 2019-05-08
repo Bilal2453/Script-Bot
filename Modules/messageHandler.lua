@@ -26,6 +26,7 @@ local function callCommand(command, message, ...)
   end
 
   command.rArgs = object
+  command.args  = args[1]
 
   if command.hasPerms and command.hasPerms(message) then
     s, e = pcall(command, message, args)
@@ -38,6 +39,31 @@ local function callCommand(command, message, ...)
     logger:log(1, e or "e is nil!!")
   end
 end
+
+local function commandsSpliter(message)
+  if not message or not message.content then return false end
+
+  local cmds = message.content:split(" ")
+  for i, v in pairs(cmds) do
+    cmds[i] = v:lower() or v
+  end
+  return cmds
+end
+
+client:on("eMessageCreate", function(message)
+  local args = commandsSpliter(message)
+  if message.author.bot then return end
+
+  for _, command in pairs(commands) do
+    for _, name in pairs(command.commandNames or  {}) do
+      if args[1] == client._perfix.. name then
+        table.remove(args, 1)
+        callCommand(command, message, args)
+        break
+      end
+    end
+  end
+end)
 
 -- Welcome Handling
 --[[
@@ -61,44 +87,3 @@ client:on("notBotMessageCreate", function(message, args)
   end
 end)
 ]]
---[[
--- Owner Commands Handling
-client:on("ownerMessageCreate", function(message, args)
-  if args[1] == "shutdown" then
-    commands.shutdown(message)
-  end
-end)
-]]
-
--- Commands Handling
-client:on("notBotMessageCreate", function(message, args)
-  -- Say command
-  if args[1] == "\217\130\217\132" or args[1] == "say" then
-    callCommand(commands.say, message)
-  elseif args[1] == "\216\167\217\133\216\179\216\173"
-  or args[1] == "del" or args[1] == "delete"
-  or args[1] == "clr" or args[1] == "clear" or args[1] == "cls" then
-    table.remove(args, 1)
-    callCommand(commands.clear, message, args)
-
-  elseif args[1] == "shutup" or args[1] == "mute"
-  or args[1] == "\216\167\216\179\217\131\216\170" then
-
-    table.remove(args, 1)
-    callCommand(commands.mute, message, table.concat(args, " "))
-
-  elseif args[1] == "unmute"
-  or args[1] == "\216\170\217\131\217\132\217\133" or args[1] == "talk" then
-
-    table.remove(args, 1)
-    callCommand(commands.unmute, message, table.concat(args, " "))
-  elseif args[1] == "help" or args[1] == "\216\167\217\132\217\133\216\179\216\167\216\185\216\175\216\169" then
-    callCommand(commands.help, message)
-  elseif args[1] == "test" then
-    table.remove(args, 1)
-    callCommand(commands.testing, message, args)
-  elseif args[1] == "/eval" then
-    table.remove(args, 1)
-    callCommand(commands.eval, message)
-  end
-end)

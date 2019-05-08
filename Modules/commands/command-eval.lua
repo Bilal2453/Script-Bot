@@ -28,7 +28,10 @@ local function eval(self)
 	if returned ~= nil then message:reply(codeBlock(returned)) end
 end
 
-local eval = createCommand(eval, "sendMessages")
+eval = createCommand(eval, "sendMessages")
+eval.commandNames = {
+	"eval"
+}
 
 eval.name = "eval"
 return eval

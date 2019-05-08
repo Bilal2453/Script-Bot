@@ -1,8 +1,9 @@
 local function unmute(self)
-	if not self.rArgs.message or not self.rArgs.person then return false end
+	if not self.rArgs.message then return false end
 
 	local message = self.rArgs.message
-	local person = self.rArgs.person
+	local person = table.concat(self.args, " ")
+	if not person or person == "" then return end
 
 	local muteRole
 	local member, isTable, embed = findMember(message, tostring(person))
@@ -42,9 +43,11 @@ local function unmute(self)
 	return false -- fail for unknown reason
 end
 
-local unmute = createCommand(unmute, "manageMessages")
-unmute.arguments = {
-	person = {type = "string", numa = 1}
+unmute = createCommand(unmute, "manageMessages")
+unmute.commandNames = {
+	"unmute",
+	"talk",
+	"\216\170\217\131\217\132\217\133"
 }
 
 unmute.name = "unmute"

@@ -5,7 +5,10 @@ local function shutdown(self)
   end
 end
 
-local shutdown = createCommand(shutdown, "administrator")
+shutdown = createCommand(shutdown, "administrator")
+shutdown.commandNames = {
+  "shutdown"
+}
 
 shutdown.name = "shutdown"
 return shutdown

@@ -1,8 +1,5 @@
 local discordia = require("discordia")
 local fs = require("fs")
-local stopWatch = discordia.Stopwatch
-
-discordia.extensions()
 
 function findMember(message, name)
 	if type(name) ~= "string" or name == "" then return false end
@@ -43,11 +40,10 @@ function findMember(message, name)
 end
 
 local createCommand = function(func, perms)
-
 	local cmd = {}
 	cmd.rArgs = {}
 
-	-- For calling the table
+	-- Calls the table
 	if type(func) == "function" then
 		cmd = setmetatable({}, {__call = func})
 	end
@@ -83,14 +79,13 @@ local createCommand = function(func, perms)
 
 		return doesHave
 	end
-
 	return cmd
 end
 
-local commands = {}
+local commands = {} -- Commands will be stored here
 local commandsDirec = "./Modules/commands/"
 
-local commandsEnv = setmetatable({require = env.require, client = client, findMember = findMember, createCommand = createCommand, stopWatch = stopWatch, discordia = discordia}, {__index = _G})
+local commandsEnv = setmetatable({require = env.require, client = client, findMember = findMember, createCommand = createCommand, discordia = discordia}, {__index = _G})
 commandsEnv.env = env
 commandsEnv.timer = env.timer
 
@@ -109,20 +104,21 @@ local function loadCommands()
 		end
 	end
 
-	for _, path in pairs(files) do
+	for i, path in pairs(files) do
 		local success, loadFunc = pcall(loadfile, path, "t", commandsEnv)
 		if not success then
-			logger.log(2, path.. " was not loaded\n".. "Error: ".. tostring(loadFunc))
+			logger:log(2, tFiles[i].. " was not loaded\n".. "Error: ".. tostring(loadFunc))
 			return
 		end
 
 		local success, cmd = pcall(loadFunc)
 		if not success then
-			logger.log(2, path.. " was not loaded\n Error: ".. tostring(cmd))
+			logger:log(2, tFiles[i].. " was not loaded\n Error: ".. tostring(cmd))
 			return
 		end
 
 		commands[type(cmd) == "table" and cmd.name or 0] = cmd or nil
+		logger:log(3, tFiles[i].. " command was successfuly loaded")
 	end
 end
 -- Loads the commands for the first time.
@@ -130,6 +126,7 @@ loadCommands()
 
 -- Try to reload commands on every message sent.
 client:on("loadCommands", function()
+	-- If there wasn't any change on command file, it won't reload it.
 	loadCommands()
 end)
 return commands

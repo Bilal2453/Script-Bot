@@ -20,7 +20,11 @@ local function say(self)
   message:reply(table.concat(splited, " "))
 end
 
-local say = createCommand(say, "sendMessages")
+say = createCommand(say, "sendMessages")
+say.commandNames = {
+  "say",
+  "\217\130\217\132"
+}
 
 say.name = "say"
 return say

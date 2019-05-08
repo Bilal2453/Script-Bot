@@ -2,7 +2,9 @@ local function mute(self)
   if not self.rArgs.message then return false end
 	-- Some global vars
 	local message = self.rArgs.message
-	local person = self.rArgs.person
+	local person = table.concat(self.args, " ")
+	if not person or person == "" then return end
+	
 	local muteRole
 	-- This will create the "Muted" role and sets its permission and return it
 	local function createMutedRoll()
@@ -71,9 +73,11 @@ local function mute(self)
 	return false
 end
 
-local mute = createCommand(mute, "manageMessages")
-mute.arguments = {
-	person = {type = "string", numa = 1}
+mute = createCommand(mute, "manageMessages")
+mute.commandNames = {
+	"mute",
+	"shutup",
+	"\216\167\216\179\217\131\216\170"
 }
 
 mute.name = "mute"

@@ -38,8 +38,7 @@ local function loadModules()
 				client:removeAllListeners("notBotMessageCreate")
 				client:removeAllListeners("ownerMessageCreate")
 				client:removeAllListeners("adminMessageCreate")
-			elseif module == "messageEventHandler" then
-				client:removeAllListeners("eMessageCreate") -- reloads "messageEventHandler"
+				client:removeAllListeners("eMessageCreate") 
 			end
 			_G[module] = nil -- Unload the modules before reloading them
 
