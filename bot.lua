@@ -1,107 +1,125 @@
-local discordia = require('discordia')
--- print('\027' .. '[2J')
-discordia.extensions()
+local discordia	= require 'discordia'
+local configs		= require './include/configs'
+local constants	= require './include/constants'
+local loadDirec	= require './include/loader'.loadDirec
 
-local fs = require("fs")
-local timer = require("timer")
-local logger = discordia.Logger(4, "%Y-%m-%d %X")
+local classType = discordia.class.type
 
-local tokenID = os.getenv("token") or io.open("token.txt", "r"):read()
-
+local logger = discordia.Logger(4, '%Y-%m-%d %X')
+local baseEmitter = discordia.Emitter()
 local client = discordia.Client {
 	cacheAllMembers = true,
 	syncGuilds = true
 }
 
-local modulesTablePath = "./Modules/modulesTable.lua"
+local TOKEN = configs.token or os.getenv('token') or error("Attempt to find the token")
+local MODULES_PATH = constants.MODULES_PATH
 
-local env = setmetatable({timer = timer, require = require, client = client, guild = guild, logger = logger}, {__index = _G})
-env.env = env -- Cool, right ?
+discordia.extensions()
 
-local modules = loadfile(modulesTablePath, "t", env)()
+--*[[ Environment Declaretions ]]
 
-local lastLoadedModules = {}
 
-local function loadModules()
-	for module, path in pairs(modules) do
-		if fs.existsSync(path)
-		and lastLoadedModules[module] ~= fs.readFileSync(path) then
+local env =	setmetatable(
+	{
+		require = require, -- luvit's require
+		discordia = discordia,
+		client = client,
+		logger = logger,
+		TOKEN = TOKEN,
+		f = string.format,
+		constants = constants,
+		envLoaders = {},
+	}, {__index = _G}
+)
+env.env = env
 
-			local moduleName = tostring(module:sub(1, 1):upper().. module:sub(2) or nil)
-			local err
-			local su1, loaderFunction
-			local su2, returnedGlobal
+local function aerror(n, to, e, v)
+	e = type(e) ~= "table" and {e} or e
+	local s
 
-			-- Remove all listeners for reloading
-			-- (if the reload fail without removing these listeners a problem will be waiting)
-			if module == "messageHandler" then
-				client:removeAllListeners("notBotMessageCreate")
-				client:removeAllListeners("ownerMessageCreate")
-				client:removeAllListeners("adminMessageCreate")
-				client:removeAllListeners("eMessageCreate") 
-			end
-			_G[module] = nil -- Unload the modules before reloading them
-
-			-- re/loading the Modules
-			su1, loaderFunction = pcall(loadfile, path, "t", env)
-			if su1 then
-				su2, returnedGlobal = pcall(loaderFunction)
-				if su2 then
-					_G[module] = returnedGlobal
-				else
-					err = returnedGlobal
-				end
-			else
-				err = loaderFunction
-			end
-			-- Error handling
-			if err then
-				logger:log(2, "\"".. moduleName.. "\" Module was not loaded.\n"..
-				"Error: ".. tostring(err or nil))
-				_G[module] = {} -- Fixes a problem: can't index a nil value
-			else
-				lastLoadedModules[module] = fs.readFileSync(path)
-				logger:log(3, "\"".. moduleName.. "\" Module was loaded succesfuly.")
-			end
-
-		elseif not fs.existsSync(path) then
-			logger:log(1, "No such file: ".. path)
+	for _, value in ipairs(e) do
+		if classType(v) == value then
+			s = true; break
 		end
 	end
+
+	if s then
+		return v
+	else
+		return error(('bad argument #%d to "%s" (%s expected, got %s)'):format(
+		n, to, table.concat(e, '|'), classType(v)))
+	end
+end
+env.aerror = aerror
+
+-- This custom method will keep only one listener.
+-- Every time it is called will assign the new callback, and remove all old callbacks.
+baseEmitter._onOnce = function (self, eName, callback)
+	if self:getListenerCount(eName) >= 1 then
+		self:removeAllListeners(eName)
+	end
+
+	return baseEmitter:on(eName, callback)
+end
+env.baseEmitter = baseEmitter
+
+function env.assertCmd(success, mesg, obj, reac)
+	if type(success) ~= "boolean" then
+		reac = obj
+		obj = mesg
+		mesg = success
+		success = false
+	end
+	obj = aerror(3, 'assertCmd', {'Message','nil'}, obj) or {}
+
+	local isMessage = obj.reply and true
+	local send = isMessage and obj.reply or obj.send
+
+	do -- addReaction
+		if not isMessage or reac then return end
+		if success then
+			pcall(obj:addReaction('✅'))
+		else
+			obj:addReaction('❌')
+		end
+	end
+
+	if not success then
+		if isMessage then
+			send(obj, configs.messageHead.. mesg)
+		else
+			return mesg
+		end
+	end
+
+	return true
 end
 
+-- Ikr... this is kinda dumb but it is best what I can do for now
+setfenv(loadDirec, env)
+env.loadDirec = loadDirec
+
+--*[[ Events ]]
+
+client:once('ready', function()
+	env.envLoaders.Moudles = {loadDirec(MODULES_PATH,
+		'%.module%.lua$', nil, 'Module', nil,
+		function(name, module) env[name] = module end
+	)}
+
+	baseEmitter:emit('initingModulesFinish')
+end)
+
 client:on('ready', function()
-	logger:log(3, 'Logged in as '.. tostring(client.user.username))
-	client:setGame({
-		name = "Coding Myself..."
-	})
-	loadModules() -- Loads the Modules
-	-- Defining some values to the client
-	client._findMember = commands and commands.findMember or function() return end
-	client._badWords = {
-		"fuck", "shit", "bitch", "motherfucker", "فك",
-		"موثير", "كس", "كسمك", "كسامك", "قحط",
-		"قحب", "انبيك", "نيك", "أنيك", "يا كلب",
-		"امك", "أمك", "dick", "pussy", "vagena",
-		"boobs", "سكس", "sex", "porn", "خرا",
-		"زق", "حمار", "زب", "طيز", "طز"
-	}
-	client._messageHead = "**Beep Boop !!**\n"
-	client._runningTime = os.time()
-	client._perfix = ""
+	logger:log(3, 'Successfully logged in')
+	client:setGame{name = 'Coding Myself...'}
 end)
 
 client:on('messageCreate', function(message)
-	pcall(loadModules) -- Reloads modules if needs to.
+	if message.author.bot then return end
 
-	if not tostring(message) then return end
-
-	if not client._findMember then
-		client._findMember = commands and commands.findMember or function() end
-	end
-	
-	client:emit("loadCommands")
-	client:emit("eMessageCreate", message)
+	baseEmitter:emit('cMessageCreate', message)
 end)
 
-client:run('Bot '.. tokenID)
+client:run('Bot ' .. TOKEN)
