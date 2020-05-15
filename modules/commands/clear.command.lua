@@ -100,7 +100,7 @@ command:setAliases{
 }
 
 command:setPermissions{
-	"guildOwner"
+	"manageMessages"
 }
 
 return command
