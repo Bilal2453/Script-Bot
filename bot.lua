@@ -79,7 +79,7 @@ function env.assertCmd(success, mesg, obj, reac)
 	do -- addReaction
 		if not isMessage or reac then return end
 		if success then
-			pcall(obj:addReaction('✅'))
+			obj:addReaction('✅')
 		else
 			obj:addReaction('❌')
 		end
