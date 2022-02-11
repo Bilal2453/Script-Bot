@@ -115,7 +115,7 @@ end
 
 -- TODO: Accept only one argument, which will declear all of the flags
 -- TODO: or one flag instead of accepting every possible chance.
--- TODO MUST: Simplefy the method as much as possible and needed. silly
+-- TODO MUST: Simplify the method as much as possible and needed. silly
 function Command:setArguments(name, argType, shortflag, fullflag, eatArgs, optional, output)
 	self._arguments = self._arguments or {}
 
