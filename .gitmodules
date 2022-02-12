@@ -1,0 +1,6 @@
+[submodule "deps/commandia"]
+	path = deps/commandia
+	url = https://github.com/Bilal2453/Commandia.git
+[submodule "deps/discordia"]
+	path = deps/discordia
+	url = https://github.com/SinisterRectus/discordia.git
