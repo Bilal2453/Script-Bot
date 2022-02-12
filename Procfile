@@ -1,1 +1,0 @@
-worker: luvit bot.lua

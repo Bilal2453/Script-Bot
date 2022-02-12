@@ -1,0 +1,15 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "cSpell.words": [
+      "commandia"
+    ],
+    "Lua.diagnostics.disable": [
+      "lowercase-global"
+    ]
+  }
+}

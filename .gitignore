@@ -1,9 +1,0 @@
-*.bat
-*.code-workspace
-
-gateway.json
-discordia.log
-
-.vscode
-
-configs.json
