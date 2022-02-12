@@ -12,7 +12,7 @@ local function eval(message)
 
 	local evalEnv = setmetatable(table.copy(env), {__index = env})
 	evalEnv.message = message
-	evalEnv.mesg = message
+	evalEnv.msg = message
 	evalEnv.commands = env.commands
 
 	evalEnv.channel = message.channel
@@ -22,7 +22,7 @@ local function eval(message)
 		tx = type(tx) == "table" and #tx == 1 and tx[1] or tx
 
 		if type(tx) ~= "table" then
-			message:reply(tx)
+			message:reply(tostring(tx))
 			return
 		end
 
