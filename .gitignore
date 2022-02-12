@@ -1,0 +1,4 @@
+configs.lua
+*.code-workspace
+*.log
+gateway.json
